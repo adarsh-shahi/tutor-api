@@ -1,33 +1,33 @@
-### 7 tables
+### 8 tables
 
 1. users
 
 ```sql
 CREATE TABLE users(
   id SERIAL PRIMARY KEY,
-  created_at TIMESTAMP,
-  updated_at TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   email VARCHAR(255) UNIQUE NOT NULL,
   password VARCHAR(500) NOT NULL,
-  role DEFAULT, -- student
+  role VARCHAR(20) DEFAULT 'student',
   name VARCHAR(40) NOT NULL,
   bio VARCHAR(400),
-  avatar VARCHAR(200),
+  avatar VARCHAR(200)
 );
 ```
 
 #
 
-2. pending_roles
+2. pendingRoles
 
 ```sql
 CREATE TABLE pendingRoles(
    id SERIAL PRIMARY KEY,
-   created_at TIMESTAMP,
+   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
    name VARCHAR(40) NOT NULL,
    email VARCHAR(255) UNIQUE NOT NULL,
    password VARCHAR(500) NOT NULL,
-   appliedRole varchar(10),
+   appliedRole varchar(20)
 );
 ```
 
@@ -38,48 +38,44 @@ CREATE TABLE pendingRoles(
 ```sql
 CREATE TABLE courses(
    id SERIAL PRIMARY KEY,
-   created_at TIMESTAMP,
-   updated_at TIMESTAMP,
-   teacher_id INTEGER NOT NULL ON DELETE SET NULL,
+   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+	 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+   teacher_id INTEGER NOT NULL REFERENCES users(id) ON DELETE SET NULL,
    name VARCHAR(100) NOT NULL,
    description VARCHAR(1000),
-   image VARCHAR(200) NOT NULL,
-   FOREIGN KEY(teacher_id) REFERENCES users(id),
+   thumbnail VARCHAR(200) NOT NULL
 );
 ```
 
 #
 
-4.  courses_videos
+4.  coursesVideos
 
 ```sql
-CREATE TABLE coursevideo(
+CREATE TABLE courseVideos(
    id SERIAL PRIMARY KEY,
-   created_at TIMESTAMP,
-   updated_at TIMESTAMP,
-   course_id INTEGER NOT NULL ON DELETE CASCADE,
+   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+	 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+   course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
    name VARCHAR(100) NOT NULL,
    description VARCHAR(1000),
-   image VARCHAR(200) NOT NULL,
-   url VARCHAR(2048) NOT NULL,
-   FOREIGN KEY(cource_id) REFERENCES cources(id)
+   thumbnail VARCHAR(200) NOT NULL,
+   url VARCHAR(2048) NOT NULL
 );
 ```
 
 #
 
-5.  pending_course_video
+5.  pendingCourseVideo
 
 ```sql
-CREATE TABLE pending_course_video(
-   id SERIAL PRIMARY KEY,
-   created_at TIMESTAMP,
-   cource_id INTEGER NOT NULL ON DELETE CASCADE,
-   name VARCHAR(100) NOT NULL,
-   description VARCHAR(1000),
-   image VARCHAR(200) NOT NULL,
-   url VARCHAR(2048) NOT NULL,
-   FOREIGN KEY(cource_id) REFERENCES cources(id)
+CREATE TABLE pendingCourseVideo(
+  id SERIAL PRIMARY KEY,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+	name VARCHAR(100),
+	description VARCHAR(1000),
+	course_id INTEGER,
+	url VARCHAR(100)
 );
 ```
 
@@ -89,14 +85,13 @@ CREATE TABLE pending_course_video(
 
 ```sql
 CREATE TABLE ratings(
-   id SERIAL PRIMARY KEY,
-   created_at TIMESTAMP,
-   updated_at TIMESTAMP,
-   cource_id INTEGER NOT NULL ON DELETE CASCADE,
-   user_id INTEGER NOT NULL ON DELETE CASCADE,
-   rating INTEGER,
-   FOREIGN KEY(cource_id) REFERENCES cources(id),
-   FOREIGN KEY(user_id) REFERENCES users(id)
+  id SERIAL PRIMARY KEY,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+	course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+	user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  rating INTEGER,
+	UNIQUE(course_id, user_id)
 );
 ```
 
@@ -107,13 +102,11 @@ CREATE TABLE ratings(
 ```sql
 CREATE TABLE comments(
    id SERIAL PRIMARY KEY,
-   created_at TIMESTAMP,
-   updated_at TIMESTAMP,
-   user_id  INTEGER  NOT NULL ON DELETE CASCADE,
-   video_id INTEGER NOT NULL ON DELETE CASCADE,
-   content VARCHAR(1000),
-   FOREIGN KEY(user_id) REFERENCES users(id),
-   FOREIGN KEY(video_id) REFERENCES video(id)
+   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+	 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+   video_id INTEGER REFERENCES courseVideos(id) ON DELETE CASCADE,
+   content VARCHAR(1000)
 );
 ```
 
@@ -121,13 +114,12 @@ CREATE TABLE comments(
 
 ```sql
 CREATE TABLE reviews(
-   id SERIAL PRIMARY KEY,
-   created_at TIMESTAMP,
-   updated_at TIMESTAMP,
-   user_id  INTEGER UNIQUE NOT NULL ON DELETE CASCADE,
-   cource_id INTEGER UNIQUE NOT NULL ON DELETE CASCADE,
-   content VARCHAR(1000),
-   FOREIGN KEY(user_id) REFERENCES users(id),
-   FOREIGN KEY(cource_id) REFERENCES cources(id)
+  id SERIAL PRIMARY KEY,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+	course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+	user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+	content VARCHAR(500),
+	UNIQUE(course_id, user_id)
 );
 ```
